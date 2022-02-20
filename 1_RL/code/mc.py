@@ -1,4 +1,3 @@
-from os import environ
 import gym
 import random
 import numpy as np
@@ -73,7 +72,7 @@ class MonteCarloPI():
         self.env.reset()
         self.env.set_state(state)
         for _ in range(int(self.max_step/5)):
-            env.render()
+            self.env.render()
             if _ == 0:
                 print("iteration:{}, init_state: {}".format(iter, self.env.state))
             next_state, reward, is_terminal, info = self.env.step( self.env.actions[np.argmax(self.Q_s_a[self.env.state-1])] )

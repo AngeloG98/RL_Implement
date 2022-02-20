@@ -150,7 +150,7 @@ class ValueIter():
     def forward(self, iter):
         self.env.reset()
         for _ in range(int(self.max_iter/50)):
-            env.render()
+            self.env.render()
             if _ == 0:
                 print("iteration:{}, init_state: {}".format(iter, self.env.state))
             next_state, reward, is_terminal, info = self.env.step(self.pi[self.env.state])

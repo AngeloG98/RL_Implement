@@ -172,13 +172,9 @@ class ValueIter():
         
 if __name__ == "__main__":
     env = gym.make('GridWorld-v0')
-    # PI = PolicyIter(env)
-    # PI.policy_iterate()
-    # for _ in range(10):
-    #     PI.forward("Test")
-    VI = ValueIter(env)
-    VI.policy_iterate()
+    # dp = PolicyIter(env)
+    dp = ValueIter(env)
+    dp.policy_iterate()
     for _ in range(10):
-        VI.forward("Test")
-    print()
+        dp.forward("Test")
     env.close()

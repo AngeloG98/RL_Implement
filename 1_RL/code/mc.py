@@ -45,7 +45,7 @@ class MonteCarloPI():
                 if is_terminal:
                     break
             
-            # incremental monte carlo
+            # incremental monte carlo / every visit
             for t in range(len(s_sample)):
                 s = s_sample[t]
                 a = a_sample[t]
@@ -103,5 +103,4 @@ if __name__ == "__main__":
                 print("state {} sucess :), reward is {}".format(state, reward))
             else:
                 print("state {} fail :(, reward is {}".format(state, reward))
-    print()
     env.close()

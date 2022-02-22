@@ -199,13 +199,13 @@ class Qlearning_VFA(LinearVFA):
 
 if __name__ == "__main__":
     # hyperparameter
-    episodes = 1000
+    episodes = 200
     max_step = 1000
     lr = 0.5
     gamma = 0.9
-    epsilon = 0.1
-    num_tiles = 16 # 8 16
-    param_vector_size = 1048576 # 32768 1048576
+    epsilon = 0.3
+    num_tiles = 8 # 8 16
+    param_vector_size = 32768 # 32768 1048576
     # environment
     # env = gym.make("MountainCar-v0")
     env = gym.make("CartPole-v0")
@@ -213,11 +213,11 @@ if __name__ == "__main__":
     # lvfa = Sarsa_VFA(env, num_tiles, param_vector_size, episodes, max_step, lr, gamma, epsilon)
     lvfa = Qlearning_VFA(env, num_tiles, param_vector_size, episodes, max_step, lr, gamma, epsilon)
     # train
-    # episode_reward_list = lvfa.train()
-    # for _ in range(10):
-    #     lvfa.forward(test_step = 10000)
-    # plt.plot(episode_reward_list)
-    # plt.show()
+    episode_reward_list = lvfa.train()
+    for _ in range(10):
+        lvfa.forward(test_step = 10000)
+    plt.plot(episode_reward_list)
+    plt.show()
     # test
-    lvfa.forward(test_step = 10000, filename = "2_Deep_ValueBased/Model-demo/Sarsa_VFA-CartPole-v0_episode_200")
-    # lvfa.forward(test_step = 10000, filename = "2_Deep_ValueBased/Model/Qlearning_VFA-CartPole-v0_episode_800")
+    # lvfa.forward(test_step = 10000, filename = "2_Deep_ValueBased/Model-demo/Sarsa_VFA-CartPole-v0_episode_200")
+    # lvfa.forward(test_step = 10000, filename = "2_Deep_ValueBased/Model/Qlearning_VFA-CartPole-v0_episode_200")

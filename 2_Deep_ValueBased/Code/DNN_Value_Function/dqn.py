@@ -52,13 +52,16 @@ class DQN():
         loss = self.loss_func(q_target.view(batch_size, 1), q_value.view(batch_size, 1))
         optimizer.zero_grad()
         loss.backward()
-        optimizer.step()        
+        optimizer.step()      
+
+        return loss.item()  
     
     def train(self, episodes = 1000, max_step = 1000, lr = 0.01, batch_size = 32, target_net_update = 10):
         optimizer = optim.Adam(self.net.parameters(), lr=lr)
         
         learn_count = 0
         episode_reward_list = []
+        loss_list = []
         for episode in range(episodes+1):
             state = self.env.reset()
 
@@ -72,12 +75,7 @@ class DQN():
                 state_, reward, is_terminal, info = self.env.step(action)
 
                 x, x_dot, theta, theta_dot = state_
-                # break for "CartPole-v0"
-                # if str(self.env.env.spec.id) == "CartPole-v0":
-                #     if self.env.x_threshold < abs(x) or self.env.theta_threshold_radians*5 < abs(theta):
-                #         is_terminal = True
-                #     else:
-                #         is_terminal = False
+
                 # reward function for "CartPole-v0"
                 if str(self.env.spec.id) == "CartPole-v0":
                     r1 = (self.env.x_threshold - abs(x))/self.env.x_threshold - 0.8
@@ -92,7 +90,8 @@ class DQN():
                     learn_count += 1
                     if learn_count % target_net_update == 0:
                         self.target_net.load_state_dict(self.net.state_dict())
-                    self.learn(optimizer, batch_size)
+                    loss = self.learn(optimizer, batch_size)
+                    loss_list.append(loss)
                     
                 if is_terminal or step == max_step - 1:
                     print("use_step:{}, episode:{}, reward_sum: {:.2f}, learn_count:{}".format(step, episode, episode_reward, learn_count))
@@ -100,10 +99,10 @@ class DQN():
 
                 state = state_
 
-            if episode % 100 == 0 and episode != 0:
+            if episode % 400 == 0 and episode != 0:
                 self.save_net(episode)
             episode_reward_list.append(episode_reward)
-        return episode_reward_list
+        return episode_reward_list, loss_list
 
     def save_net(self, episode):
         torch.save(self.net.state_dict(), "2_Deep_ValueBased/Model/DQN-" + str(self.env.spec.id) + "_episode_" + str(episode)+".pkl")
@@ -126,23 +125,27 @@ if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print("Using " + device.type + "...")
     # parameters
-    episodes = 400
+    episodes = 10000
     max_step = 10000
     lr = 0.01
     gamma = 0.9
     epsilon = 0.1
     batch_size = 32
-    replay_buffer = 2000
+    replay_buffer = 200
     target_net_update = 100
     # environment
     env = gym.make("CartPole-v0")
     env = env.unwrapped
     # model
     dqn = DQN(env, gamma, epsilon, replay_buffer, device)
-    episode_reward_list = dqn.train(episodes, max_step, lr, batch_size, target_net_update)
+    episode_reward_list, loss_list = dqn.train(episodes, max_step, lr, batch_size, target_net_update)
     # for _ in range(10):
-    #     dqn.forward(test_step = 10000)
+    #     dqn.forward(test_step = 10000) 
+    plt.subplot(211)
+    plt.plot(loss_list)
+    plt.subplot(212)
     plt.plot(episode_reward_list)
     plt.show()
     # test
-    # dqn.forward(test_step = 10000, filename = '2_Deep_ValueBased/Model/DQN-CartPole-v0_episode_400.pkl')
+    # dqn.forward(test_step = 10000, filename = '2_Deep_ValueBased/Model/DQN-CartPole-v0_episode_100.pkl')
+    # dqn.forward(test_step = 10000, filename = "2_Deep_ValueBased/Model/DQN-.pkl")

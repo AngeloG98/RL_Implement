@@ -1,7 +1,7 @@
 import copy
 import torch
 from model import *
-from common import *
+from utils import *
 from collections import deque
 
 class DQN_agent():
@@ -50,14 +50,10 @@ class DQN_agent():
             self.target_net.load_state_dict(self.net.state_dict())
 
         q_values = self.net(state)
-        # q_value, _ = torch.max(q_values, axis=1)
         q_value = q_values.gather(-1, action.view(batch_size, 1)).view(-1)
 
         max_q_value_ = self.get_qvalue_(state_)
-
-        # q_target = reward + self.gamma * max_q_value_ 
         q_target = reward + self.gamma * max_q_value_ * (1 - is_terminal)
-
 
         loss = self.loss_func(q_value.view(batch_size, 1), q_target.view(batch_size, 1))
         self.optimizer.zero_grad()

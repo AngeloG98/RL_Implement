@@ -26,6 +26,10 @@ for i in tqdm(range(2)):
         # env.render()
         action = agent.get_action(state, env.action_space.n, epsilon = 0.0)
         state_, reward, is_terminal, info = env.step(action)
+        x, x_dot, theta, theta_dot = state_
+        r1 = ((env.x_threshold - abs(x))/env.x_threshold - 0.5)
+        r2 = ((env.theta_threshold_radians - abs(theta))/env.theta_threshold_radians - 0.5) * 1.5
+        reward = r1 + r2
         state = state_
         reward_sum += reward
         step += 1
@@ -34,8 +38,8 @@ for i in tqdm(range(2)):
     step_list.append(step)
 env.close()
 
-plt.subplot(211)
+plt.subplot(121)
 plt.plot(step_list)
-plt.subplot(212)
+plt.subplot(122)
 plt.plot(reward_list)
 plt.show()

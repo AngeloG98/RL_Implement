@@ -30,8 +30,8 @@ for i in tqdm(range(episodes)):
         action = agent.get_action(state, env.action_space.n, epsilon)
         state_, reward, is_terminal, info = env.step(action)
         x, x_dot, theta, theta_dot = state_
-        r1 = (env.x_threshold - abs(x))/env.x_threshold - 0.8
-        r2 = (env.theta_threshold_radians - abs(theta))/env.theta_threshold_radians - 0.5
+        r1 = ((env.x_threshold - abs(x))/env.x_threshold - 0.5)
+        r2 = ((env.theta_threshold_radians - abs(theta))/env.theta_threshold_radians - 0.5) * 1.5
         reward = r1 + r2
 
         agent.store_memory(state, action, reward, state_, is_terminal)
@@ -55,6 +55,8 @@ for i in tqdm(range(episodes)):
         if save_count >= 3:
             agent.save_trained_model("2_Deep_ValueBased/Model/cartpole-dqn-my.pth")
             break
+    else:
+        save_count = 0
         
     if epsilon > 0.05:
         epsilon -= (1 / 5000)

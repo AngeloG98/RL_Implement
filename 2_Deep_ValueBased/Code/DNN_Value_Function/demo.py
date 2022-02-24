@@ -1,6 +1,6 @@
 import gym
+import time
 import matplotlib.pyplot as plt
-from time import sleep
 from tqdm import tqdm
 from dqn import DQN_agent
 
@@ -18,12 +18,12 @@ agent = DQN_agent(seed, layer_sizes, lr, gamma, sync_freq, exp_replay_size)
 agent.load_pretrained_model("2_Deep_ValueBased/Model/cartpole-dqn-my.pth")
 
 reward_list, step_list = [], []
-for i in tqdm(range(100)):
+for i in tqdm(range(2)):
     step, reward_sum, is_terminal = 0, 0, False
     state = env.reset()
     while not is_terminal:
-        sleep(0.01)
-        env.render()
+        # time.sleep(0.01)
+        # env.render()
         action = agent.get_action(state, env.action_space.n, epsilon = 0.0)
         state_, reward, is_terminal, info = env.step(action)
         state = state_

@@ -11,7 +11,7 @@ class DQN_fnn(nn.Module):
         layers = []
         for index in range(len(layer_sizes) - 1):
             linear = nn.Linear(layer_sizes[index], layer_sizes[index + 1])
-            act = nn.Tanh() if index < len(layer_sizes) - 2 else nn.Identity()
+            act = nn.ReLU() if index < len(layer_sizes) - 2 else nn.Identity()
             layers += (linear, act)
 
         self.layer_sizes = layer_sizes

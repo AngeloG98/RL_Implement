@@ -10,9 +10,9 @@ input_dim = env.observation_space.shape[0]
 output_dim = env.action_space.n
 
 layer_sizes = [input_dim, 64, output_dim]
-lr = 1e-2
+lr = 1e-3
 gamma = 0.95
-sync_freq = 10
+sync_freq = 5
 exp_replay_size = 256
 agent = DQN_agent(seed, layer_sizes, lr, gamma, sync_freq, exp_replay_size)
 
@@ -29,6 +29,10 @@ for i in tqdm(range(episodes)):
     while not is_terminal:
         action = agent.get_action(state, env.action_space.n, epsilon)
         state_, reward, is_terminal, info = env.step(action)
+        x, x_dot, theta, theta_dot = state_
+        r1 = (env.x_threshold - abs(x))/env.x_threshold - 0.8
+        r2 = (env.theta_threshold_radians - abs(theta))/env.theta_threshold_radians - 0.5
+        reward = r1 + r2
 
         agent.store_memory(state, action, reward, state_, is_terminal)
         # agent.store_memory([state, action, reward, state_, is_terminal])
@@ -53,7 +57,7 @@ for i in tqdm(range(episodes)):
             break
         
     if epsilon > 0.05:
-        epsilon -= (1 / 4000)
+        epsilon -= (1 / 5000)
 
     if step != 0:
         loss_list.append(loss_sum / step)

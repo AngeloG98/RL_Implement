@@ -11,7 +11,6 @@ class DQN_agent():
         self.gamma = torch.tensor(gamma).float().cuda()
 
         self.net = DQN_fnn(layer_sizes)
-        # self.net = self.build_nn(layer_sizes)
         self.target_net = copy.deepcopy(self.net)
         self.net.cuda()
         self.target_net.cuda()
@@ -22,16 +21,6 @@ class DQN_agent():
         self.sync_freq = sync_freq
         self.learn_count = 0
         self.exp_replay_mem = ReplayMemory(exp_replay_size)
-        # self.exp_replay_mem = deque(maxlen=exp_replay_size)
-
-    def build_nn(self, layer_sizes):
-        assert len(layer_sizes) > 1
-        layers = []
-        for index in range(len(layer_sizes) - 1):
-            linear = nn.Linear(layer_sizes[index], layer_sizes[index + 1])
-            act = nn.Tanh() if index < len(layer_sizes) - 2 else nn.Identity()
-            layers += (linear, act)
-        return nn.Sequential(*layers)
 
     def get_action(self, state, action_space_len, epsilon):
         with torch.no_grad():
@@ -48,7 +37,6 @@ class DQN_agent():
 
     def store_memory(self, *exp):
         self.exp_replay_mem.push_pop(*exp)
-        # self.exp_replay_mem.append(exp)
 
     def learn(self, batch_size):
         batch = self.exp_replay_mem.sample(batch_size)
@@ -56,12 +44,7 @@ class DQN_agent():
         action = torch.LongTensor(batch.action).cuda()
         reward = torch.tensor(batch.reward).float().cuda()
         state_ = torch.tensor(np.float32(batch.state_)).float().cuda()
-        is_terminal = torch.tensor(batch.is_terminal).float()
-        # sample = random.sample(self.exp_replay_mem, batch_size)
-        # state = torch.tensor([exp[0] for exp in sample]).float().cuda()
-        # action = torch.LongTensor([exp[1] for exp in sample]).cuda()
-        # reward = torch.tensor([exp[2] for exp in sample]).float().cuda()
-        # state_ = torch.tensor([exp[3] for exp in sample]).float().cuda()
+        is_terminal = torch.tensor(batch.is_terminal).float().cuda()
 
         if self.learn_count % self.sync_freq == 0:
             self.target_net.load_state_dict(self.net.state_dict())
@@ -72,9 +55,11 @@ class DQN_agent():
 
         max_q_value_ = self.get_qvalue_(state_)
 
-        q_target = reward + self.gamma * max_q_value_
+        # q_target = reward + self.gamma * max_q_value_ 
+        q_target = reward + self.gamma * max_q_value_ * (1 - is_terminal)
 
-        loss = self.loss_func(q_value, q_target)
+
+        loss = self.loss_func(q_value.view(batch_size, 1), q_target.view(batch_size, 1))
         self.optimizer.zero_grad()
         loss.backward(retain_graph=True)
         self.optimizer.step()

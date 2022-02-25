@@ -20,7 +20,7 @@ exp_replay_size = 256
 # agent = double_DQN_agent(seed, layer_sizes, lr, gamma, sync_freq, exp_replay_size)
 agent = dueling_DQN_agent(seed, layer_sizes, lr, gamma, sync_freq, exp_replay_size)
 
-episodes = 10000
+episodes = 8000
 epsilon = 1.0
 batch_size = 16
 loss_list, reward_list, step_list, epsilon_list = [], [], [], []
@@ -32,8 +32,8 @@ LEARN_FREQ = exp_replay_size/2
 LEARN_TIMES = 4
 collect_count = exp_replay_size/2
 
-SAVE_COUNT_THR = 3
-SAVE_REWARD_THR = -3
+SAVE_COUNT_THR = 5
+SAVE_REWARD_THR = -0.03
 save_count = 0
 
 for episode in tqdm(range(episodes+1)):
@@ -59,11 +59,11 @@ for episode in tqdm(range(episodes+1)):
         step += 1
         collect_count += 1
     
-    if sum(step_reward_list[-50:]) >= SAVE_REWARD_THR:
+    if sum(step_reward_list[-10:]) >= SAVE_REWARD_THR:
         save_count += 1
         if save_count >= SAVE_COUNT_THR:
             print("Saving trained model...")
-            agent.save_trained_model("2_Deep_ValueBased/Model/"+ agent.name +"DQN-Pendulum-v1" + "_episode_" + str(episode)+".pth")
+            agent.save_trained_model("2_Deep_ValueBased/Model/"+ agent.name +"_DQN-Pendulum-v1" + "_episode_" + str(episode)+".pth")
             break
     else:
         save_count = 0
@@ -80,7 +80,7 @@ env.close()
 
 if save_count < SAVE_COUNT_THR:
     print("Saving trained model...")
-    agent.save_trained_model("2_Deep_ValueBased/Model/"+ agent.name +"DQN-Pendulum-v1" + "_episode_" + str(episodes)+".pth")
+    agent.save_trained_model("2_Deep_ValueBased/Model/"+ agent.name +"_DQN-Pendulum-v1" + "_episode_" + str(episodes)+".pth")
 
 plt.subplot(221)
 plt.plot(loss_list)
@@ -90,5 +90,5 @@ plt.subplot(223)
 plt.plot(reward_list)
 plt.subplot(224)
 plt.plot(epsilon_list)
-plt.savefig("2_Deep_ValueBased/Fig/"+ agent.name +"DQN-Pendulum-v1_plot.jpg")
+plt.savefig("2_Deep_ValueBased/Fig/"+ agent.name +"_DQN-Pendulum-v1_plot.jpg")
 plt.show()

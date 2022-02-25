@@ -21,7 +21,7 @@ class dueling_DQN_agent():
         self.learn_count = 0
         self.exp_replay_mem = ReplayMemory(exp_replay_size)
 
-        self.name = "dueling_"
+        self.name = "dueling"
 
     def get_action(self, state, action_space_len, epsilon):
         with torch.no_grad():
@@ -30,13 +30,11 @@ class dueling_DQN_agent():
         A = A if torch.rand(1, ).item() > epsilon else torch.randint(0, action_space_len, (1,))
         return A.item(), Q
 
-    def get_qvalue_(self, state, batch_size):
+    def get_qvalue_(self, state):
         with torch.no_grad():
-            q_target_net = self.target_net(state)
-            q_net = self.net(state)
-        _, action_max = torch.max(q_net, axis=1)
-        q_max_ = q_target_net.gather(-1, action_max.view(batch_size, 1)).view(-1)
-        return q_max_
+            q_values_ = self.target_net(state)
+        q_max, _ = torch.max(q_values_, axis=1)
+        return q_max
 
     def store_memory(self, *exp):
         self.exp_replay_mem.push_pop(*exp)
@@ -55,7 +53,7 @@ class dueling_DQN_agent():
         q_values = self.net(state)
         q_value = q_values.gather(-1, action.view(batch_size, 1)).view(-1)
 
-        max_q_value_ = self.get_qvalue_(state_, batch_size)
+        max_q_value_ = self.get_qvalue_(state_)
         q_target = reward + self.gamma * max_q_value_ * (1 - is_terminal)
 
         loss = self.loss_func(q_value.view(batch_size, 1), q_target.view(batch_size, 1))

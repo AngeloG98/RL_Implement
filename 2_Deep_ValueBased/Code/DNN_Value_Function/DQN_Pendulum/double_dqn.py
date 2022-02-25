@@ -21,7 +21,7 @@ class double_DQN_agent():
         self.learn_count = 0
         self.exp_replay_mem = ReplayMemory(exp_replay_size)
 
-        self.name = "double_"
+        self.name = "double"
 
     def get_action(self, state, action_space_len, epsilon):
         with torch.no_grad():

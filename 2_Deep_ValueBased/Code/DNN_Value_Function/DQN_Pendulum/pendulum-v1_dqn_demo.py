@@ -3,6 +3,7 @@ import time
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 from dqn import DQN_agent
+from double_dqn import double_DQN_agent
 from dueling_dqn import dueling_DQN_agent
 from utils import *
 
@@ -17,8 +18,9 @@ gamma = 0.95
 sync_freq = 5
 exp_replay_size = 256
 # agent = DQN_agent(seed, layer_sizes, lr, gamma, sync_freq, exp_replay_size)
+# agent = double_DQN_agent(seed, layer_sizes, lr, gamma, sync_freq, exp_replay_size)
 agent = dueling_DQN_agent(seed, layer_sizes, lr, gamma, sync_freq, exp_replay_size)
-agent.load_pretrained_model("2_Deep_ValueBased/Model/dueling_DQN-Pendulum-v1_episode_3168.pth")
+agent.load_pretrained_model("2_Deep_ValueBased/Model/"+ agent.name +"_DQN-Pendulum-v1_episode_6959.pth")
 
 TEST_TIMES = 3
 TEST_MAX_STEP = 200

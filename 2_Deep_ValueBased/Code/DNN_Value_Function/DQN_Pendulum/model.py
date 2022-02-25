@@ -31,7 +31,7 @@ class dueling_DQN_fnn(nn.Module):
         layers = []
         for index in range(len(layer_sizes) - 2):
             linear = nn.Linear(layer_sizes[index], layer_sizes[index + 1])
-            act = nn.ReLU() if index < len(layer_sizes) - 2 else nn.Identity()
+            act = nn.ReLU()
             layers += (linear, act)
 
         self.fc1 = nn.Sequential(*layers)

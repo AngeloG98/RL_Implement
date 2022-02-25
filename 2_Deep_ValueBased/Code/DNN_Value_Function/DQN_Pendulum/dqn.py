@@ -21,7 +21,7 @@ class DQN_agent():
         self.learn_count = 0
         self.exp_replay_mem = ReplayMemory(exp_replay_size)
 
-        self.name = "natural_"
+        self.name = "natural"
 
     def get_action(self, state, action_space_len, epsilon):
         with torch.no_grad():

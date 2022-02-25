@@ -21,12 +21,14 @@ class DQN_agent():
         self.learn_count = 0
         self.exp_replay_mem = ReplayMemory(exp_replay_size)
 
+        self.name = "natural_"
+
     def get_action(self, state, action_space_len, epsilon):
         with torch.no_grad():
             Qp = self.net(torch.from_numpy(state).float().cuda())
         Q, A = torch.max(Qp, axis=0)
         A = A if torch.rand(1, ).item() > epsilon else torch.randint(0, action_space_len, (1,))
-        return A.item()
+        return A.item(), Q
 
     def get_qvalue_(self, state):
         with torch.no_grad():

@@ -1,4 +1,3 @@
-from turtle import forward
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -28,21 +27,28 @@ class dueling_DQN_fnn(nn.Module):
         assert len(layer_sizes) > 1
         self.layer_sizes = layer_sizes
 
-        layers = []
-        for index in range(len(layer_sizes) - 2):
+        layers_adv = []
+        for index in range(len(layer_sizes) - 1):
             linear = nn.Linear(layer_sizes[index], layer_sizes[index + 1])
-            act = nn.ReLU()
-            layers += (linear, act)
+            act = nn.ReLU() if index < len(layer_sizes) - 2 else nn.Identity()
+            layers_adv += (linear, act)
+        
+        layers_value = []
+        for index in range(len(layer_sizes) - 1):
+            if index == len(layer_sizes) - 2:
+                linear = nn.Linear(layer_sizes[index], 1)
+                act = nn.Identity()
+                layers_value += (linear, act)
+            else:
+                linear = nn.Linear(layer_sizes[index], layer_sizes[index + 1])
+                act = nn.ReLU()
+                layers_value += (linear, act)
 
-        self.fc1 = nn.Sequential(*layers)
-        self.fc2 = nn.Sequential(*layers)
-        self.value_layer = nn.Linear(layer_sizes[-2], 1)
-        self.adv_layer = nn.Linear(layer_sizes[-2], layer_sizes[-1])
+        self.fc_adv = nn.Sequential(*layers_adv)
+        self.fc_value = nn.Sequential(*layers_value)
 
     def forward(self, x):
-        y1 = self.fc1(x)
-        y2 = self.fc2(x)
-        value = self.value_layer(y1)
-        adv = self.adv_layer(y2)
+        value = self.fc_value(x)
+        adv = self.fc_adv(x)
         adv_average = torch.mean(adv, dim=0, keepdim=True)
         return value + adv - adv_average

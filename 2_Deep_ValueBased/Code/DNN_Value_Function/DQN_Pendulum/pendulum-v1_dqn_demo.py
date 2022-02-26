@@ -18,9 +18,9 @@ gamma = 0.95
 sync_freq = 5
 exp_replay_size = 256
 # agent = DQN_agent(seed, layer_sizes, lr, gamma, sync_freq, exp_replay_size)
-agent = double_DQN_agent(seed, layer_sizes, lr, gamma, sync_freq, exp_replay_size)
-# agent = dueling_DQN_agent(seed, layer_sizes, lr, gamma, sync_freq, exp_replay_size)
-agent.load_pretrained_model("2_Deep_ValueBased/Model/"+ agent.name +"_DQN-Pendulum-v1_episode_1730.pth")
+# agent = double_DQN_agent(seed, layer_sizes, lr, gamma, sync_freq, exp_replay_size)
+agent = dueling_DQN_agent(seed, layer_sizes, lr, gamma, sync_freq, exp_replay_size)
+agent.load_pretrained_model("2_Deep_ValueBased/Model/"+ agent.name +"_DQN-Pendulum-v1_episode_2477.pth")
 
 TEST_TIMES = 3
 TEST_MAX_STEP = 200

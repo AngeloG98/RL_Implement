@@ -116,8 +116,8 @@ class Ex_Sarsa(TD):
 if __name__ == "__main__":
     env = gym.make('GridWorld-v0')
     # td = Sarsa(env)
-    # td = Qlearning(env)
-    td = Ex_Sarsa(env)
+    td = Qlearning(env)
+    # td = Ex_Sarsa(env)
     td.update()
     for state in env.states:
         if state not in env.terminal_rewards:

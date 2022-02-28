@@ -85,8 +85,9 @@ class LinearVFA(metaclass= abc.ABCMeta):
             self.env.render()
             action = self.greed(state)
             state, reward, is_terminal, info = self.env.step(action[0])
-            # if is_terminal:
-            #     break
+            if is_terminal:
+                print("step:{}".format(step))
+                break
 
     @abc.abstractclassmethod
     def train(self):
@@ -198,17 +199,17 @@ class Qlearning_VFA(LinearVFA):
             pickle.dump(self.iht.dictionary, f)
 
 if __name__ == "__main__":
-    # hyperparameter
-    episodes = 200
+    # parameters
+    episodes = 400
     max_step = 1000
     lr = 0.5
     gamma = 0.9
-    epsilon = 0.3
+    epsilon = 0.3 # MountainCar-v0 0.0 / CartPole-v0 0.3
     num_tiles = 8 # 8 16
     param_vector_size = 32768 # 32768 1048576
     # environment
-    # env = gym.make("MountainCar-v0")
-    env = gym.make("CartPole-v0")
+    # env = gym.make("MountainCar-v0") # change max_episode_steps=10000
+    env = gym.make("CartPole-v0") # change max_episode_steps=10000
     # model
     # lvfa = Sarsa_VFA(env, num_tiles, param_vector_size, episodes, max_step, lr, gamma, epsilon)
     lvfa = Qlearning_VFA(env, num_tiles, param_vector_size, episodes, max_step, lr, gamma, epsilon)
@@ -219,5 +220,7 @@ if __name__ == "__main__":
     plt.plot(episode_reward_list)
     plt.show()
     # test
-    # lvfa.forward(test_step = 10000, filename = "2_Deep_ValueBased/Model-demo/Sarsa_VFA-CartPole-v0_episode_200")
-    # lvfa.forward(test_step = 10000, filename = "2_Deep_ValueBased/Model/Qlearning_VFA-CartPole-v0_episode_200")
+    lvfa.forward(test_step = 10000, filename = "2_Deep_ValueBased/Model/Sarsa_VFA-CartPole-v0_episode_400")
+    # lvfa.forward(test_step = 10000, filename = "2_Deep_ValueBased/Model/Qlearning_VFA-CartPole-v0_episode_400")
+    # lvfa.forward(test_step = 10000, filename = "2_Deep_ValueBased/Model-demo/Sarsa_VFA-CartPole-v0_episode_200") # 16 1048576
+    # lvfa.forward(test_step = 10000, filename = "2_Deep_ValueBased/Model-demo/Qlearning_VFA-CartPole-v0_episode_800") # 8 32768

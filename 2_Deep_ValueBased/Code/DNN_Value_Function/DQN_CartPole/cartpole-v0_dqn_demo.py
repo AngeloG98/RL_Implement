@@ -16,7 +16,7 @@ gamma = 0.95
 sync_freq = 5
 exp_replay_size = 256
 agent = DQN_agent(seed, layer_sizes, lr, gamma, sync_freq, exp_replay_size)
-agent.load_pretrained_model("2_Deep_ValueBased/Model/DQN-CartPole-v0_episode_4151.pth")
+agent.load_pretrained_model("2_Deep_ValueBased/Model/DQN-CartPole-v0_episode_7376.pth")
 
 TEST_TIMES = 3
 TEST_MAX_STEP = 1000

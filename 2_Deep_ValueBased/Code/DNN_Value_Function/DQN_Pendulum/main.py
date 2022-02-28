@@ -16,9 +16,9 @@ lr = 1e-3
 gamma = 0.95
 sync_freq = 5
 exp_replay_size = 256
-agent = DQN_agent(seed, layer_sizes, lr, gamma, sync_freq, exp_replay_size)
+# agent = DQN_agent(seed, layer_sizes, lr, gamma, sync_freq, exp_replay_size)
 # agent = double_DQN_agent(seed, layer_sizes, lr, gamma, sync_freq, exp_replay_size)
-# agent = dueling_DQN_agent(seed, layer_sizes, lr, gamma, sync_freq, exp_replay_size)
+agent = dueling_DQN_agent(seed, layer_sizes, lr, gamma, sync_freq, exp_replay_size)
 
 episodes = 8000
 epsilon = 1.0

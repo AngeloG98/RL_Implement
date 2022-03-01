@@ -1,4 +1,5 @@
 import gym
+import math
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
@@ -17,7 +18,7 @@ state_channel = env.observation_space.shape[2]
 seed = 1423
 gamma = 0.99
 
-lr = 1e-3
+lr = 2e-4
 sync_freq = 1000
 exp_replay_size = 100000
 agent = DQN_agent1(seed, state_channel, action_space, lr, gamma, sync_freq, exp_replay_size)
@@ -31,13 +32,17 @@ EPSILON_DEC = 1/3000
 EPSILON_MIN = 1/200
 
 frame_idx = 0
+epsilon_max = 1
+epsilon_min = 0.01
+eps_decay = 30000
+epsilon_by_frame = lambda frame_idx: epsilon_min + (epsilon_max - epsilon_min) * math.exp(-1. * frame_idx / eps_decay)
 for episode in range(episodes+1):
     loss_sum, step, step_reward_list, is_terminal = 0, 0, [], False
     frame = env.reset()
     while not is_terminal:# env.render()
-
+        epsilon_i = epsilon_by_frame(frame_idx)
         state = agent.observe(frame)
-        action, _ = agent.get_action(state, epsilon)
+        action, _ = agent.get_action(state, epsilon_i)
         frame_, reward, is_terminal, info = env.step(action)
         # state_ = agent.get_state(frame_)
         
@@ -54,7 +59,7 @@ for episode in range(episodes+1):
         frame_idx += 1
 
         if frame_idx % (exp_replay_size/100) == 0 and step != 0:
-            print("frame_idx: %5d, reward: %5f, loss: %4f, epsilon: %5f, episode: %4d" % (frame_idx, np.mean(reward_list[-10:]), loss, epsilon, episode))
+            print("frame_idx: %5d, reward: %5f, loss: %4f, epsilon: %5f, episode: %4d" % (frame_idx, np.mean(reward_list[-10:]), loss, epsilon_i, episode))
     
     # if sum(step_reward_list[-10:]) >= SAVE_REWARD_THR:
     #     save_count += 1
@@ -72,7 +77,7 @@ for episode in range(episodes+1):
         loss_list.append(loss_sum)
         reward_list.append(sum(step_reward_list))
         step_list.append(step)
-        epsilon_list.append(epsilon)
+        epsilon_list.append(epsilon_i)
 env.close()
 
 # if save_count < SAVE_COUNT_THR:

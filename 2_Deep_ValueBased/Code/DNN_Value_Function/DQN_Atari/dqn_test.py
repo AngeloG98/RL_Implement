@@ -16,7 +16,8 @@ class DQN_agent1():
         self.target_net.cuda()
 
         self.loss_func = torch.nn.MSELoss()
-        self.optimizer = torch.optim.Adam(self.net.parameters(), lr=lr)
+        # self.optimizer = torch.optim.Adam(self.net.parameters(), lr=lr)
+        self.optimizer = torch.optim.RMSprop(self.net.parameters(),lr=lr, eps=0.001, alpha=0.95)
 
         self.sync_freq = sync_freq
         self.learn_count = 0
@@ -75,7 +76,8 @@ class DQN_agent1():
         max_q_value_ = self.get_qvalue_(state_)
         q_target = reward + self.gamma * max_q_value_ * (1 - is_terminal)
 
-        loss = self.loss_func(q_value.view(batch_size, 1), q_target.view(batch_size, 1))
+        # loss = self.loss_func(q_value, q_target)
+        loss = F.smooth_l1_loss(q_value, q_target)
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()

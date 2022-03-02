@@ -48,7 +48,7 @@ for episode in tqdm(range(episodes+1)):
             if collect_count > LEARN_FREQ:
                 collect_count = 0
                 for _ in range(LEARN_TIMES):
-                    loss = agent.learn(batch_size=16)
+                    loss = agent.learn(batch_size)
                     loss_sum += loss
         reward_sum += reward
         step += 1

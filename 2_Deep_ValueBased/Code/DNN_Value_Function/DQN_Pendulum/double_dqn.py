@@ -43,7 +43,7 @@ class double_DQN_agent():
 
     def learn(self, batch_size):
         batch = self.exp_replay_mem.sample(batch_size)
-        state = torch.tensor(batch.state).float().cuda()
+        state = torch.tensor(np.float32(batch.state)).float().cuda()
         action = torch.LongTensor(batch.action).cuda()
         reward = torch.tensor(batch.reward).float().cuda()
         state_ = torch.tensor(np.float32(batch.state_)).float().cuda()

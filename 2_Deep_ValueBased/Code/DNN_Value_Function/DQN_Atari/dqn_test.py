@@ -4,8 +4,7 @@ from model import *
 from utils import *
 
 class DQN_agent1():
-    def __init__(self, seed, in_channels, action_space, lr = 1e-3, gamma = 0.9, sync_freq = 5, exp_replay_size = 256) -> None:
-        torch.manual_seed(seed)
+    def __init__(self, in_channels, action_space, lr = 1e-3, gamma = 0.9, sync_freq = 5, exp_replay_size = 256) -> None:
 
         self.action_space = action_space
         self.gamma = torch.tensor(gamma).float().cuda()
@@ -16,8 +15,9 @@ class DQN_agent1():
         self.target_net.cuda()
 
         self.loss_func = torch.nn.MSELoss()
-        # self.optimizer = torch.optim.Adam(self.net.parameters(), lr=lr)
-        self.optimizer = torch.optim.RMSprop(self.net.parameters(),lr=lr, eps=0.001, alpha=0.95)
+        # self.optimizer = torch.optim.Adam(self.net.parameters(), lr=lr, eps=0.001)
+        # self.optimizer = torch.optim.RMSprop(self.net.parameters(),lr=lr, eps=0.001, alpha=0.95)
+        self.optimizer = torch.optim.RMSprop(self.net.parameters(),lr=lr)
 
         self.sync_freq = sync_freq
         self.learn_count = 0
@@ -76,10 +76,13 @@ class DQN_agent1():
         max_q_value_ = self.get_qvalue_(state_)
         q_target = reward + self.gamma * max_q_value_ * (1 - is_terminal)
 
-        # loss = self.loss_func(q_value, q_target)
-        loss = F.smooth_l1_loss(q_value, q_target)
+        # loss = self.loss_func(q_value.view(batch_size, 1), q_target.view(batch_size, 1))
+        loss = self.loss_func(q_value, q_target)
+        # loss = F.smooth_l1_loss(q_value, q_target)
         self.optimizer.zero_grad()
         loss.backward()
+        for param in self.net.parameters():
+                param.grad.data.clamp_(-1, 1)
         self.optimizer.step()
 
         self.learn_count += 1

@@ -1,28 +1,30 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import numpy as np
 
 class DQN_conv(nn.Module):
-    def __init__(self, in_channels=4, num_actions=5):
-        """
-        Initialize a deep Q-learning network as described in
-        https://storage.googleapis.com/deepmind-data/assets/papers/DeepMindNature14236Paper.pdf
-        Arguments:
-            in_channels: number of channel of input.
-                i.e The number of most recent frames stacked together as describe in the paper
-            num_actions: number of action-value to output, one-to-one correspondence to action in game.
-        """
+    def __init__(self, input_shape, num_actions):
         super(DQN_conv, self).__init__()
-        self.conv1 = nn.Conv2d(in_channels, 32, kernel_size=8, stride=4)
-        self.conv2 = nn.Conv2d(32, 64, kernel_size=4, stride=2)
-        self.conv3 = nn.Conv2d(64, 64, kernel_size=3, stride=1)
-        self.fc4 = nn.Linear(7 * 7 * 64, 512)
-        self.fc5 = nn.Linear(512, num_actions)
+
+        self.conv = nn.Sequential(
+            nn.Conv2d(input_shape[0], 32, kernel_size=8, stride=4),
+            nn.ReLU(),
+            nn.Conv2d(32, 64, kernel_size=4, stride=2),
+            nn.ReLU(),
+            nn.Conv2d(64, 64, kernel_size=3, stride=1),
+            nn.ReLU()
+        )
+        feature_size = self._get_feature_size(input_shape)
+        self.fc = nn.Sequential(
+            nn.Linear(feature_size, 512),
+            nn.ReLU(),
+            nn.Linear(512, num_actions)
+        )
+
+    def _get_feature_size(self, shape):
+        o = self.conv(torch.zeros(1, *shape))
+        return int(np.prod(o.size()))
 
     def forward(self, x):
-        x = F.relu(self.conv1(x))
-        x = F.relu(self.conv2(x))
-        x = F.relu(self.conv3(x))
-        x = F.relu(self.fc4(x.reshape(x.size(0), -1)))
-        return self.fc5(x)
+        feature = self.conv(x).view(x.size()[0], -1)
+        return self.fc(feature)

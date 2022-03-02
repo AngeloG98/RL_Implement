@@ -15,13 +15,12 @@ action_dim = env.action_space.n
 state_dim = env.observation_space.shape[0]
 state_channel = env.observation_space.shape[2]
 
-seed = 1423
 gamma = 0.99
 
 lr = 2e-4
 sync_freq = 1000
 exp_replay_size = 100000
-agent = DQN_agent1(seed, state_channel, action_space, lr, gamma, sync_freq, exp_replay_size)
+agent = DQN_agent1(state_channel, action_space, lr, gamma, sync_freq, exp_replay_size)
 
 episodes = 1000000
 epsilon = 1.0
@@ -49,9 +48,10 @@ for episode in range(episodes+1):
         # agent.store_memory([state[0], action, reward, state_[0], is_terminal])
         agent.memory_buffer.push(frame, action, reward, frame_, is_terminal)
         frame = frame_
-    
+        
+        loss = 0.0
         # if len(agent.exp_replay_mem) >= exp_replay_size/100:
-        if agent.memory_buffer.size() >= exp_replay_size/100:
+        if agent.memory_buffer.size() >= exp_replay_size/10:
             loss = agent.learn(batch_size)
             loss_sum += loss
         step_reward_list.append(reward)

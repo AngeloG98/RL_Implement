@@ -16,9 +16,9 @@ lr = 1e-3
 gamma = 0.95
 sync_freq = 5
 exp_replay_size = 256
-# agent = DQN_agent(seed, layer_sizes, lr, gamma, sync_freq, exp_replay_size)
+agent = DQN_agent(seed, layer_sizes, lr, gamma, sync_freq, exp_replay_size)
 # agent = double_DQN_agent(seed, layer_sizes, lr, gamma, sync_freq, exp_replay_size)
-agent = dueling_DQN_agent(seed, layer_sizes, lr, gamma, sync_freq, exp_replay_size)
+# agent = dueling_DQN_agent(seed, layer_sizes, lr, gamma, sync_freq, exp_replay_size)
 
 episodes = 8000
 epsilon = 1.0
@@ -53,8 +53,10 @@ for episode in tqdm(range(episodes+1)):
             if collect_count > LEARN_FREQ:
                 collect_count = 0
                 for _ in range(LEARN_TIMES):
-                    loss = agent.learn(batch_size=16)
+                    loss = agent.learn(batch_size)
                     loss_sum += loss
+            # loss = agent.learn(batch_size)
+            # loss_sum += loss
         step_reward_list.append(reward)
         step += 1
         collect_count += 1
@@ -90,5 +92,5 @@ plt.subplot(223)
 plt.plot(reward_list)
 plt.subplot(224)
 plt.plot(epsilon_list)
-plt.savefig("2_Deep_ValueBased/Fig/"+ agent.name +"_DQN-Pendulum-v1_plot.jpg")
+# plt.savefig("2_Deep_ValueBased/Fig/"+ agent.name +"_DQN-Pendulum-v1_plot.jpg")
 plt.show()

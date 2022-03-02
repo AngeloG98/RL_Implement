@@ -15,7 +15,8 @@ class DQN_agent():
         self.target_net.cuda()
 
         self.loss_func = torch.nn.MSELoss()
-        self.optimizer = torch.optim.Adam(self.net.parameters(), lr=lr)
+        # self.optimizer = torch.optim.Adam(self.net.parameters(), lr=lr)
+        self.optimizer = torch.optim.RMSprop(self.net.parameters(),lr=lr, eps=0.001, alpha=0.95)
 
         self.sync_freq = sync_freq
         self.learn_count = 0
@@ -41,7 +42,7 @@ class DQN_agent():
 
     def learn(self, batch_size):
         batch = self.exp_replay_mem.sample(batch_size)
-        state = torch.tensor(batch.state).float().cuda()
+        state = torch.tensor(np.float32(batch.state)).float().cuda()
         action = torch.LongTensor(batch.action).cuda()
         reward = torch.tensor(batch.reward).float().cuda()
         state_ = torch.tensor(np.float32(batch.state_)).float().cuda()

@@ -1,15 +1,17 @@
 import copy
 import torch
-from model import *
-from utils import *
+import torch.nn.functional as F
+import numpy as np
+from model import DQN_conv
+from utils import ReplayMemory
 
 class DQN_agent():
-    def __init__(self, seed, layer_sizes, lr = 1e-3, gamma = 0.9, sync_freq = 5, exp_replay_size = 256) -> None:
+    def __init__(self, seed, input_shape, num_actions, lr = 1e-3, gamma = 0.9, sync_freq = 5, exp_replay_size = 256) -> None:
         torch.manual_seed(seed)
 
         self.gamma = torch.tensor(gamma).float().cuda()
 
-        self.net = DQN_fnn(layer_sizes)
+        self.net = DQN_conv(input_shape, num_actions)
         self.target_net = copy.deepcopy(self.net)
         self.net.cuda()
         self.target_net.cuda()
@@ -23,18 +25,23 @@ class DQN_agent():
         self.exp_replay_mem = ReplayMemory(exp_replay_size)
 
         self.name = "natural"
+        self.input_shape = input_shape
+        self.num_actions = num_actions
 
-    def get_action(self, state, action_space_len, epsilon):
+    def norm_state(self, state): 
+        return np.float32(state)/255 # to numpy and normalize
+
+    def get_action(self, state, epsilon):
         with torch.no_grad():
-            Qp = self.net(torch.from_numpy(state).float().cuda())
-        Q, A = torch.max(Qp, axis=0)
-        A = A if torch.rand(1, ).item() > epsilon else torch.randint(0, action_space_len, (1,))
+            Qp = self.net(torch.from_numpy(state).float().unsqueeze(0).cuda()) # unsqueeze batch axis = 1
+        Q, A = torch.max(Qp, axis=1) # batch axis
+        A = A if torch.rand(1, ).item() > epsilon else torch.randint(0, self.num_actions, (1,))
         return A.item(), Q
 
     def get_qvalue_(self, state):
         with torch.no_grad():
             q_values_ = self.target_net(state)
-        q_max, _ = torch.max(q_values_, axis=1)
+        q_max, _ = torch.max(q_values_, axis=1) # batch axis
         return q_max
 
     def store_memory(self, *exp):
@@ -58,6 +65,7 @@ class DQN_agent():
         q_target = reward + self.gamma * max_q_value_ * (1 - is_terminal)
 
         loss = self.loss_func(q_value, q_target)
+        # loss = F.smooth_l1_loss(q_value, q_target)
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()

@@ -1,6 +1,9 @@
 """
-An atari wrapper
-from https://github.com/AmazingAng/deep-RL-elements.git
+Atari wrapper from openai-baseline
+https://https://github.com/openai/baselines/blob/master/baselines/common/atari_wrappers.py
+
+Modified for Pytorch
+
 """
 
 import numpy as np
@@ -96,39 +99,6 @@ class EpisodicLifeEnv(gym.Wrapper):
         self.lives = self.env.unwrapped.ale.lives()
         return obs
 
-class LossLifePunishEnv(gym.Wrapper):
-    def __init__(self, env , train = "True", fire_reset = False):
-        """Make end-of-life have a -1 reward when training. 
-        When evaluation, end-of-life have 0 reward, but perform no-op step to advance from terminal/lost life state
-        if fire_reset = True, performs fire action to reset when life is loss
-        """
-        if train:
-            self.loss_life_punishment = -1
-        else:
-            self.loss_life_punishment = 0
-                
-        gym.Wrapper.__init__(self, env)
-        self.lives = 0
-        self.fire_reset = fire_reset
-
-    def step(self, action):
-        obs, reward, done, info = self.env.step(action)
-        # check current lives, make loss of life terminal,
-        # then update lives to handle bonus lives
-        lives = self.env.unwrapped.ale.lives()
-        if lives < self.lives and lives > 0:
-            # set reward to -1 when life is loss
-            reward += self.loss_life_punishment
-            # no-op step to advance from terminal/lost life state
-            obs, _, _, _ = self.env.step(0)
-            if self.fire_reset:        
-                obs, _, done, _ = self.env.step(1)
-        self.lives = lives
-        return obs, reward, done, info
-
-    def reset(self, **kwargs):
-        return self.env.reset(**kwargs)
-
 class MaxAndSkipEnv(gym.Wrapper):
     def __init__(self, env, skip=4):
         """Return only every `skip`-th frame"""
@@ -170,6 +140,7 @@ class WarpFrame(gym.ObservationWrapper):
     def __init__(self, env, width=84, height=84, grayscale=True, dict_space_key=None):
         """
         Warp frames to 84x84 as done in the Nature paper and later work.
+
         If the environment uses dictionary observations, `dict_space_key` can be specified which indicates which
         observation should be warped.
         """
@@ -222,7 +193,9 @@ class WarpFrame(gym.ObservationWrapper):
 class FrameStack(gym.Wrapper):
     def __init__(self, env, k):
         """Stack k last frames.
+
         Returns lazy array, which is much more memory efficient.
+
         See Also
         --------
         baselines.common.atari_wrappers.LazyFrames
@@ -231,7 +204,8 @@ class FrameStack(gym.Wrapper):
         self.k = k
         self.frames = deque([], maxlen=k)
         shp = env.observation_space.shape
-        self.observation_space = spaces.Box(low=0, high=255, shape=(shp[:-1] + (shp[-1] * k,)), dtype=env.observation_space.dtype)
+        # after reshape image to (in_channels x height x width), expand in_channel to k frames
+        self.observation_space = spaces.Box(low=0, high=255, shape=(shp[0] * k, shp[1], shp[2]), dtype=env.observation_space.dtype)
 
     def reset(self):
         ob = self.env.reset()
@@ -263,14 +237,16 @@ class LazyFrames(object):
         """This object ensures that common frames between the observations are only stored once.
         It exists purely to optimize memory usage which can be huge for DQN's 1M frames replay
         buffers.
+
         This object should only be converted to numpy array before being passed to the model.
+
         You'd not believe how complex the previous solution was."""
         self._frames = frames
         self._out = None
 
     def _force(self):
         if self._out is None:
-            self._out = np.concatenate(self._frames, axis=-1)
+            self._out = np.concatenate(self._frames, axis=0) # in_channel axis
             self._frames = None
         return self._out
 
@@ -293,14 +269,25 @@ class LazyFrames(object):
     def frame(self, i):
         return self._force()[..., i]
 
-def make_atari(env_id, max_episode_steps=None):
+class PyTorchFrame(gym.ObservationWrapper):
+    def __init__(self, env):
+        super(PyTorchFrame, self).__init__(env)
+        shape = self.observation_space.shape
+        # here， reshape image to (in_channels x height x width)
+        self.observation_space = gym.spaces.Box(low=0.0, high=1.0, shape=(shape[-1], shape[0], shape[1]), dtype=env.observation_space.dtype)
+
+    def observation(self, observation):
+        return np.rollaxis(observation, 2)
+
+def make_atari(seed, env_id, max_episode_steps=None): # manual seed for env
     env = gym.make(env_id)
+    env.seed(seed) # set seed
     assert 'NoFrameskip' in env.spec.id
     env = NoopResetEnv(env, noop_max=30)
     env = MaxAndSkipEnv(env, skip=4)
     return env
 
-def wrap_deepmind(env, episode_life=False, clip_rewards=False, frame_stack=False, scale=False):
+def wrap_deepmind(env, episode_life=False, clip_rewards=True, frame_stack=False, scale=False): # default change
     """Configure environment for DeepMind-style Atari.
     """
     if episode_life:
@@ -308,6 +295,7 @@ def wrap_deepmind(env, episode_life=False, clip_rewards=False, frame_stack=False
     if 'FIRE' in env.unwrapped.get_action_meanings():
         env = FireResetEnv(env)
     env = WarpFrame(env)
+    env = PyTorchFrame(env) # add reshape frame for pytorch
     if scale:
         env = ScaledFloatFrame(env)
     if clip_rewards:

@@ -5,8 +5,9 @@ from atari_wrapper_pytorch import make_atari, wrap_deepmind
 from dqn import DQN_agent
 
 configs = {
-    "seed": 10,
-    "env": "PongNoFrameskip-v4", # use NoFrameskip versions
+    "seed": 15,
+    # use NoFrameskip versions e.g. BreakoutNoFrameskip-v4/ PongNoFrameskip-v4"
+    "env": "BreakoutNoFrameskip-v4", 
     "agent": "DQN", # DQN or 
 
     # agent hyper-parameters
@@ -23,14 +24,19 @@ configs = {
     "sync_freq": 1000, # update target network frequence
 
     # logging parameters
-    "video_freq": 50,
-    "print_freq": 10,
-    "save_freq": 100
+    "video_freq": 300,
+    "print_freq": 20,
+    "save_freq": 300
 }
 
 env = make_atari(configs["seed"], configs["env"])
 env = wrap_deepmind(env, frame_stack=True, scale=False)
-env = gym.wrappers.Monitor(env, '2_Deep_ValueBased/Video/'+configs["agent"]+'/', video_callable=lambda episode_id: episode_id%configs["video_freq"]==0,force=True)
+env = gym.wrappers.Monitor(
+    env,
+    '2_Deep_ValueBased/Video/'+configs["agent"]+'/',
+    video_callable=lambda episode_id: episode_id % configs["video_freq"] == 0,
+    force=True
+)
 
 agent = DQN_agent(
     seed=configs["seed"],
@@ -42,13 +48,11 @@ agent = DQN_agent(
     exp_replay_size=configs["exp_replay_size"]
 )
 
-seed = configs["seed"]
 epsilon = configs["eps_start"]
 loss_list, reward_list, step_list, epsilon_list = [], [], [], []
 
 for episode in range(configs["max_episode"]):
     loss_sum, reward_sum, step, is_terminal = 0, 0, 0, False
-    env.seed(seed) 
     state = env.reset()
 
     while not is_terminal:
@@ -68,7 +72,6 @@ for episode in range(configs["max_episode"]):
         epsilon = configs["eps_start"] + decay * (configs["eps_end"] - configs["eps_start"])
         epsilon_list.append(epsilon)
     
-    seed += 1
     loss_list.append(loss_sum/step)
     reward_list.append(reward_sum)
     step_list.append(step)
@@ -81,9 +84,9 @@ for episode in range(configs["max_episode"]):
         print("====================================================")
         print("total_steps: {}".format(sum(step_list)))
         print("episode: {}".format(episode))
-        print("epsilon: {}".format(round(epsilon_list[-1], 1)))
-        print("smooth episode reward: {}".format(round(smooth_reward, 1)))
-        print("episode loss:{}".format(loss_list[-1], 1))
+        print("epsilon: {}".format(round(epsilon_list[-1], 3)))
+        print("episode loss: {}".format(round(loss_list[-1], 6)))
+        print("smooth episode reward: {}".format(round(smooth_reward, 2)))
 
     if episode % configs["save_freq"] == 0 and episode != 0:
         # model
@@ -101,4 +104,5 @@ for episode in range(configs["max_episode"]):
         ax3.set_ylabel("reward")
         ax4.plot(epsilon_list)
         ax4.set_ylabel("epsilon")
+        plt.figure(figsize=(100,100))
         plt.savefig(fig_filename)

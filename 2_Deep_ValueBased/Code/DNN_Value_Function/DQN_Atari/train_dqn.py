@@ -9,7 +9,7 @@ from d3qn_per import D3QN_PER_agent
 configs = {
     "seed": 15,
     # use NoFrameskip versions e.g. BreakoutNoFrameskip-v4, PongNoFrameskip-v4
-    "env": "PongNoFrameskip-v4", 
+    "env": "BreakoutNoFrameskip-v4", 
     "agent": "D3QN_PER", # DQN or D3QN_PER
 
     # agent hyper-parameters
@@ -18,17 +18,17 @@ configs = {
     # train hyper-parameters
     "lr": 1e-4,
     "batch_size": 32,
-    "max_episode": 500,
+    "max_episode": 10000,
     "eps_start": 1.0, # epsilon-greed
     "eps_end": 0.01,
-    "eps_decay": 1e5,
-    "exp_replay_size": 5000, # experience replay buffer size
+    "eps_decay": 8e5,
+    "exp_replay_size": 10000, # experience replay buffer size
     "sync_freq": 1000, # update target network frequence
 
     # logging parameters
-    "video_freq": 50,
-    "print_freq": 10,
-    "save_freq": 100
+    "video_freq": 500,
+    "print_freq": 20,
+    "save_freq": 500
 }
 
 env = make_atari(configs["seed"], configs["env"])

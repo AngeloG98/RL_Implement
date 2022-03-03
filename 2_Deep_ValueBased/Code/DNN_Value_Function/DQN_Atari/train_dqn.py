@@ -1,14 +1,16 @@
 import gym
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 from atari_wrapper_pytorch import make_atari, wrap_deepmind
 from dqn import DQN_agent
+from d3qn_per import D3QN_PER_agent
 
 configs = {
     "seed": 15,
-    # use NoFrameskip versions e.g. BreakoutNoFrameskip-v4/ PongNoFrameskip-v4"
-    "env": "BreakoutNoFrameskip-v4", 
-    "agent": "DQN", # DQN or 
+    # use NoFrameskip versions e.g. BreakoutNoFrameskip-v4, PongNoFrameskip-v4
+    "env": "PongNoFrameskip-v4", 
+    "agent": "D3QN_PER", # DQN or D3QN_PER
 
     # agent hyper-parameters
     "gamma": 0.99, # discount factor
@@ -24,9 +26,9 @@ configs = {
     "sync_freq": 1000, # update target network frequence
 
     # logging parameters
-    "video_freq": 300,
-    "print_freq": 20,
-    "save_freq": 300
+    "video_freq": 50,
+    "print_freq": 10,
+    "save_freq": 100
 }
 
 env = make_atari(configs["seed"], configs["env"])
@@ -38,15 +40,26 @@ env = gym.wrappers.Monitor(
     force=True
 )
 
-agent = DQN_agent(
-    seed=configs["seed"],
-    input_shape=env.observation_space.shape,
-    num_actions=env.action_space.n,
-    lr=configs["lr"],
-    gamma=configs["gamma"],
-    sync_freq=configs["sync_freq"],
-    exp_replay_size=configs["exp_replay_size"]
-)
+if configs["agent"] == "DQN":
+    agent = DQN_agent(
+        seed=configs["seed"],
+        input_shape=env.observation_space.shape,
+        num_actions=env.action_space.n,
+        lr=configs["lr"],
+        gamma=configs["gamma"],
+        sync_freq=configs["sync_freq"],
+        exp_replay_size=configs["exp_replay_size"]
+    )
+else:
+    agent = D3QN_PER_agent(
+        seed=configs["seed"],
+        input_shape=env.observation_space.shape,
+        num_actions=env.action_space.n,
+        lr=configs["lr"],
+        gamma=configs["gamma"],
+        sync_freq=configs["sync_freq"],
+        exp_replay_size=configs["exp_replay_size"]
+    )
 
 epsilon = configs["eps_start"]
 loss_list, reward_list, step_list, epsilon_list = [], [], [], []
@@ -62,7 +75,7 @@ for episode in range(configs["max_episode"]):
         agent.store_memory(agent.norm_state(state), action, reward, agent.norm_state(state_), is_terminal)
         state = state_
 
-        if len(agent.exp_replay_mem) >= configs["exp_replay_size"]:
+        if agent.exp_replay_mem.size() >= configs["exp_replay_size"]:
             loss = agent.learn(configs["batch_size"])
             loss_sum += loss
 
@@ -94,15 +107,15 @@ for episode in range(configs["max_episode"]):
         agent.save_trained_model(model_filename)
         # fig
         fig_filename = "2_Deep_ValueBased/Fig/"+agent.name+"-DQN_"+configs["env"]+"_episode_"+str(episode)+"_plot.jpg"
-        fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
+        fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(9,6))
         fig.suptitle(agent.name+"-DQN_"+configs["env"]+"_episode_"+str(episode))
         ax1.plot(loss_list)
-        ax1.set_ylabel("loss")
         ax2.plot(step_list)
-        ax2.set_ylabel("step")
         ax3.plot(reward_list)
-        ax3.set_ylabel("reward")
         ax4.plot(epsilon_list)
-        ax4.set_ylabel("epsilon")
-        plt.figure(figsize=(100,100))
-        plt.savefig(fig_filename)
+        ax1.set_title("episode loss")
+        ax2.set_title("episode step")
+        ax3.set_title("episode reward")
+        ax4.set_title("step epsilon")
+        plt.tight_layout()
+        plt.savefig(fig_filename, dpi=500)

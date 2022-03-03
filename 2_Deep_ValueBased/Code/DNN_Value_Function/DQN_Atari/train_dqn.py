@@ -64,7 +64,7 @@ else:
 epsilon = configs["eps_start"]
 loss_list, reward_list, step_list, epsilon_list = [], [], [], []
 
-for episode in range(configs["max_episode"]):
+for episode in range(configs["max_episode"]+1):
     loss_sum, reward_sum, step, is_terminal = 0, 0, 0, False
     state = env.reset()
 

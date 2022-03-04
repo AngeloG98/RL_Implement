@@ -21,7 +21,7 @@ configs = {
     "max_episode": 10000,
     "eps_start": 1.0, # epsilon-greed
     "eps_end": 0.01,
-    "eps_decay": 8e5,
+    "eps_decay": 4e5,
     "exp_replay_size": 10000, # experience replay buffer size
     "sync_freq": 1000, # update target network frequence
 
@@ -75,7 +75,7 @@ for episode in range(configs["max_episode"]+1):
         agent.store_memory(agent.norm_state(state), action, reward, agent.norm_state(state_), is_terminal)
         state = state_
 
-        if agent.exp_replay_mem.size() >= configs["exp_replay_size"]:
+        if len(agent.exp_replay_mem) >= configs["exp_replay_size"]:
             loss = agent.learn(configs["batch_size"])
             loss_sum += loss
 
@@ -95,7 +95,8 @@ for episode in range(configs["max_episode"]+1):
         else:
             smooth_reward = reward_list[-1]
         print("====================================================")
-        print("total_steps: {}".format(sum(step_list)))
+        print("train model: " + agent.name)
+        print("total steps: {}".format(sum(step_list)))
         print("episode: {}".format(episode))
         print("epsilon: {}".format(round(epsilon_list[-1], 3)))
         print("episode loss: {}".format(round(loss_list[-1], 6)))

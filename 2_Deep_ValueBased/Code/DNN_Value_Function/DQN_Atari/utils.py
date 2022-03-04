@@ -122,3 +122,6 @@ class Prior_ReplayMemory(object):
         
     def size(self):
         return self.tree.n_entries
+
+    def __len__(self):
+        return self.tree.n_entries

@@ -7,7 +7,8 @@ from d3qn_per import D3QN_PER_agent
 
 configs = {
     "seed": 50,
-    "env": "PongNoFrameskip-v4", # use NoFrameskip versions
+    # use NoFrameskip versions e.g. BreakoutNoFrameskip-v4, PongNoFrameskip-v4
+    "env": "BreakoutNoFrameskip-v4", 
     "agent": "D3QN_PER", # DQN or D3QN_PER
 
     # agent hyper-parameters
@@ -50,7 +51,7 @@ else:
         sync_freq=configs["sync_freq"],
         exp_replay_size=configs["exp_replay_size"]
     )
-model_filename = "2_Deep_ValueBased/Model/DQN_Atari_pretrained/"+agent.name+"-DQN_"+configs["env"]+"_episode_300"+".pth"
+model_filename = "2_Deep_ValueBased/Model/DQN_Atari_pretrained/"+agent.name+"-DQN_"+configs["env"]+"_episode_7000"+".pth"
 agent.load_pretrained_model(model_filename)
 
 for episode in range(configs["test_episode"]):

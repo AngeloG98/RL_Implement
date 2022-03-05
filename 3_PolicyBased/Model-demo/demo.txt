@@ -1,0 +1,23 @@
+PG_CartPole-v0_episode_4000.pth:
+configs = {
+    'agent': 'PG',
+    'layer_sizes': [input_dim, 64, output_dim],
+    'lr': 1e-3,
+    'gamma': 0.99,
+    'Type': ['trajectory', 'total'], 
+    'max_episode': int(1e6),
+    'print_freq': 20,
+    'save_freq': 1000
+}
+
+PG_CartPole-v0_episode_1700.pth:
+configs = {
+    'agent': 'PG',
+    'layer_sizes': [input_dim, 64, output_dim],
+    'lr': 1e-3,
+    'gamma': 0.99,
+    'Type': ['trajectory', 'future'], 
+    'max_episode': int(1e6),
+    'print_freq': 20,
+    'save_freq': 100
+}

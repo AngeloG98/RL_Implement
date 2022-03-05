@@ -2,7 +2,7 @@ import copy
 import torch
 import torch.nn.functional as F
 import numpy as np
-from model import DQN_conv_duel
+from network import DQN_conv_duel
 from utils import Prior_ReplayMemory
 
 class D3QN_PER_agent():

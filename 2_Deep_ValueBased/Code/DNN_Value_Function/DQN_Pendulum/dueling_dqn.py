@@ -1,6 +1,6 @@
 import copy
 import torch
-from model import *
+from network import *
 from utils import *
 
 class dueling_DQN_agent():

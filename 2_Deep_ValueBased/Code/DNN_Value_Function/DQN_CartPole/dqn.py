@@ -1,6 +1,6 @@
 import copy
 import torch
-from model import *
+from network import *
 from utils import *
 
 class DQN_agent():

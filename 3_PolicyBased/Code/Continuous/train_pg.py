@@ -9,32 +9,25 @@ input_dim = env.observation_space.shape[0]
 output_dim = env.action_space.n
 
 configs = {
-    'agent': 'PG_baseline', # PG or PG_baseline
+    'agent': 'PG_baseline',
     'policy_layer_size': [input_dim, 64, output_dim],
     'value_layer_size': [input_dim, 32, 1],
     'p_lr': 1e-3,
     'v_lr': 1e-3,
     'gamma': 0.99,
-    'Type': ['trajectory', 'future'], # trajectory/step  total/future
     'max_episode': int(1e4),
     'print_freq': 20,
     'save_freq': 100
 }
 
-if configs['agent'] == 'PG':
-    agent = PG_agent(
-        configs['policy_layer_size'],
-        configs['gamma'],
-        configs['p_lr']
-    )
-else:
-    agent = PG_B_agent(
-       configs['policy_layer_size'],
-       configs['value_layer_size'],
-       configs['gamma'],
-       configs['p_lr'],
-       configs['v_lr']
-    )
+
+agent = PG_B_agent(
+    configs['policy_layer_size'],
+    configs['value_layer_size'],
+    configs['gamma'],
+    configs['p_lr'],
+    configs['v_lr']
+)
 
 loss_list, reward_list, step_list= [], [], []
 for episode in range(configs['max_episode']+1):

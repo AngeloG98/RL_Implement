@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 from pg import PG_agent
+from pg_baseline import PG_B_agent
 from utils import reward_func
 
 env = gym.make('CartPole-v0')
@@ -10,21 +11,31 @@ input_dim = env.observation_space.shape[0]
 output_dim = env.action_space.n
 
 configs = {
-    'agent': 'PG',
-    'layer_sizes': [input_dim, 64, output_dim],
-    'lr': 1e-3,
+    'agent': 'PG_baseline', # PG or PG_baseline
+    'policy_layer_size': [input_dim, 64, output_dim],
+    'value_layer_size': [input_dim, 32, 1],
+    'p_lr': 1e-3,
+    'v_lr': 1e-3,
     'gamma': 0.99,
-    'Type': ['trajectory', 'total'],
-    'test_episode': 3,
-    'print_freq': 20,
+    'Type': ['trajectory', 'future'], # trajectory/step  total/future
+    'test_episode': 3
 }
 
-agent = PG_agent(
-    configs['layer_sizes'],
-    configs['gamma'],
-    configs['lr']
-)
-model_filename = "3_PolicyBased/Model/"+agent.name+"_"+env.env.spec.id+"_episode_1500.pth"
+if configs['agent'] == 'PG':
+    agent = PG_agent(
+        configs['policy_layer_size'],
+        configs['gamma'],
+        configs['p_lr']
+    )
+else:
+    agent = PG_B_agent(
+       configs['policy_layer_size'],
+       configs['value_layer_size'],
+       configs['gamma'],
+       configs['p_lr'],
+       configs['v_lr']
+    )
+model_filename = "3_PolicyBased/Model/"+agent.name+"_"+env.env.spec.id+"_episode_1100.pth"
 agent.load_pretrained_model(model_filename)
 
 for episode in range(configs['test_episode']):

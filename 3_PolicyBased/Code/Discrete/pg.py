@@ -55,8 +55,9 @@ class PG_agent():
         if Type[0] == 'trajectory':
             probs = self.policy_net(states)
             m = Categorical(probs)
-            loss = torch.mean(-m.log_prob(actions) * dis_rewards)
-            # loss = torch.sum(-m.log_prob(actions) * dis_rewards)
+            aaa = -m.log_prob(actions) * dis_rewards
+            # loss = torch.mean(-m.log_prob(actions) * dis_rewards)
+            loss = torch.sum(-m.log_prob(actions) * dis_rewards)
             
             self.optimizer.zero_grad()
             loss.backward()

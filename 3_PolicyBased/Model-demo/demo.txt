@@ -1,10 +1,12 @@
 PG_CartPole-v0_episode_4000.pth:
 configs = {
-    'agent': 'PG',
-    'layer_sizes': [input_dim, 64, output_dim],
-    'lr': 1e-3,
+    'agent': 'PG', # PG or PG_baseline
+    'policy_layer_size': [input_dim, 64, output_dim],
+    'value_layer_size': [input_dim, 32, 1],
+    'p_lr': 1e-3,
+    'v_lr': 1e-3,
     'gamma': 0.99,
-    'Type': ['trajectory', 'total'], 
+    'Type': ['trajectory', 'total'], # trajectory/step  total/future
     'max_episode': int(1e6),
     'print_freq': 20,
     'save_freq': 1000
@@ -12,12 +14,28 @@ configs = {
 
 PG_CartPole-v0_episode_1700.pth:
 configs = {
-    'agent': 'PG',
-    'layer_sizes': [input_dim, 64, output_dim],
-    'lr': 1e-3,
+    'agent': 'PG', # PG or PG_baseline
+    'policy_layer_size': [input_dim, 64, output_dim],
+    'value_layer_size': [input_dim, 32, 1],
+    'p_lr': 1e-3,
+    'v_lr': 1e-3,
     'gamma': 0.99,
-    'Type': ['trajectory', 'future'], 
+    'Type': ['trajectory', 'future'], # trajectory/step  total/future
     'max_episode': int(1e6),
+    'print_freq': 20,
+    'save_freq': 100
+}
+
+PG_baseline_CartPole-v0_episode_1300.pth：
+configs = {
+    'agent': 'PG_baseline', # PG or PG_baseline
+    'policy_layer_size': [input_dim, 64, output_dim],
+    'value_layer_size': [input_dim, 32, 1],
+    'p_lr': 1e-3,
+    'v_lr': 1e-3,
+    'gamma': 0.99,
+    'Type': ['trajectory', 'future'], # trajectory/step  total/future
+    'max_episode': int(1e4),
     'print_freq': 20,
     'save_freq': 100
 }

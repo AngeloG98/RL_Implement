@@ -48,7 +48,7 @@ class PG_B_agent():
         actions = torch.tensor(np.array(self.traj_a)).float().cuda()
         dis_rewards = torch.tensor(np.array(self.compute_discount_R())).float().cuda()
 
-        vfs = self.value_net(states).cuda()
+        vfs = self.value_net(states).cuda().view(-1)
         with torch.no_grad():
             advs = dis_rewards - vfs
 
@@ -65,7 +65,7 @@ class PG_B_agent():
         v_loss.backward()
         self.v_optimizer.step()
 
-        return p_loss.item(), v_loss.item()
+        return np.array([p_loss.item(), v_loss.item()])
 
     def save_trained_model(self, filename):
         torch.save(self.policy_net.state_dict(), filename)

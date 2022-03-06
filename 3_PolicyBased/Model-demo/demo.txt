@@ -39,3 +39,17 @@ configs = {
     'print_freq': 20,
     'save_freq': 100
 }
+
+
+PG_baseline_Pendulum-v1_episode_6600.pth:
+configs = {
+    'agent': 'PG_baseline',
+    'policy_layer_size': [input_dim, 64, output_dim],
+    'value_layer_size': [input_dim, 32, 1],
+    'p_lr': 8e-4,
+    'v_lr': 1e-3,
+    'gamma': 0.99,
+    'max_episode': int(1e6),
+    'print_freq': 20,
+    'save_freq': 200
+}

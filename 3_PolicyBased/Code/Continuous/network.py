@@ -16,7 +16,7 @@ class PG_fc_gaussian(nn.Module):
         std_layers = []
         for index in range(len(layer_sizes)-1):
             linear = nn.Linear(layer_sizes[index], layer_sizes[index+1])
-            act = nn.ReLU() if index < len(layer_sizes)-2 else nn.Identity()
+            act = nn.ReLU() if index < len(layer_sizes)-2 else nn.Identity() #nn.Softplus()
             std_layers += (linear, act)
 
         self.mean = nn.Sequential(*mean_layers)

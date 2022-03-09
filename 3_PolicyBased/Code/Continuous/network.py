@@ -26,6 +26,8 @@ class PG_fc_gaussian(nn.Module):
     def forward(self, x):
         mu = self.mean(x) * 2
         # sigma = self.std(x)
+        # sigma = torch.clamp(sigma, min=-20, max=2)
+        # sigma = F.softplus(sigma)
         log_std = self.std(x)
         log_std = torch.clamp(log_std, min=-20, max=2)
         sigma = log_std.exp()

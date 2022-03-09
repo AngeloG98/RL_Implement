@@ -30,6 +30,7 @@ class PG_B_agent():
             action = m.sample()
         if choose_max == True:
             action = mu
+        # action = action.clamp(-2.0, 2.0)
         return action.item()
 
     def compute_discount_R(self):  

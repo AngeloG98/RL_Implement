@@ -15,8 +15,7 @@ class ActorCriticNet(nn.Module):
         self.std_net = nn.Sequential(
             nn.Linear(state_dim, 64),
             nn.ReLU(),
-            nn.Linear(64, action_dim),
-            nn.Softplus()
+            nn.Linear(64, action_dim)
         )
         self.critic_net = nn.Sequential(
             nn.Linear(state_dim, 64),
@@ -25,8 +24,12 @@ class ActorCriticNet(nn.Module):
         )
 
     def forward(self, x):
-        mu = 2*self.mean_net(x) 
-        sigma = self.std_net(x)
+        mu = 2*self.mean_net(x)
+
+        std_raw = self.std_net(x)
+        std_raw = torch.clamp(std_raw, min=-4.5) # Importante !
+        sigma = F.softplus(std_raw)
+
         value = self.critic_net(x)
         return mu, sigma, value
 

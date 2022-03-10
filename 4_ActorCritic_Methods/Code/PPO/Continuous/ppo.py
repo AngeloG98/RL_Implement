@@ -74,6 +74,7 @@ class PPO_agent:
 
     def learn(self, batch_data):
         states, actions, discount_rs, advantages, old_log_probs = batch_data
+        
         mu, sigma, values = self.ppo_net(states)
         # if act_dim == 1, needs embed here; if act_dim > 1, sigma to covariance and embed
         cov_matrix = torch.diag_embed(sigma)

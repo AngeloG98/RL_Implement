@@ -26,42 +26,48 @@ def train(args):
         e_loss_coef=args.e_loss_coef
     )
 
-    # writer = SummaryWriter('4_ActorCritic_Methods/Log/'+TIMESTAMP+'_'+args.agent_name+'/')
+    writer = SummaryWriter('4_ActorCritic_Methods/Log/'+TIMESTAMP+'_'+args.agent_name+'_'+args.env+'/')
     
     episode = 0
     step = 0
+    reward_sum = 0
     policy_loss, value_loss, entropy_loss = 0.0, 0.0, 0.0
     state = env.reset()
 
-    # writer.add_graph(agent.ppo_net, torch.tensor(state).unsqueeze(0).float().cuda())
+    writer.add_graph(agent.ppo_net, torch.tensor(state).unsqueeze(0).float().cuda())
     
     while True:
         for i in range(args.num_steps): # batch size
             action, log_prob, _, _ = agent.get_action(state)
             state_, reward, is_terminal, _ = env.step(action.cpu().numpy().reshape(-1))
+            reward = reward/10
             agent.store_traj(state, action, reward, log_prob, is_terminal)
             state = state_
             step += 1
+            reward_sum += reward
             # problem may have infinite steps (or never terminal)
             if step >= args.max_steps:
                 is_terminal = True
             if is_terminal:
                 state = env.reset()
                 #################################################### Print and Save ####################################################
-                # writer.add_scalar("Performance/episode step", step, episode)
+                writer.add_scalar("Performance/episode step", step, episode)
+                writer.add_scalar("Performance/episode reward", reward_sum, episode)
                 if episode % args.print_freq == 0 and episode >= 1:
                     print("====================================================")
                     print("train model: " + agent.name)
                     print("train env: " + args.env)
                     print("episode: {}".format(episode))
                     print("episode step: {}".format(step))
+                    print("episode reward: {}".format(reward_sum))
                     print("episode losses [policy, value, entropy]: {}".format([policy_loss, value_loss, entropy_loss]))
-                if episode % args.save_freq == 0 and episode >= 900:
+                if episode % args.save_freq == 0 and episode >= 100:
                     model_filename = "4_ActorCritic_Methods/Model/"+agent.name+"_"+env.env.spec.id+"_episode_"+str(episode)+".pth"
                     agent.save_trained_model(model_filename)
                 ########################################################################################################################
                 episode += 1
                 step = 0
+                reward_sum = 0
         # collect next state value for bootstrap
         agent.store_traj(state, None, None, None, None)
         #################################################### Learn ####################################################
@@ -71,9 +77,9 @@ def train(args):
             bs_traj = agent.bootstrap_traj()
             # learn one iteration
             policy_loss, value_loss, entropy_loss = agent.learn(bs_traj)
-            # writer.add_scalar("Loss/policy loss", policy_loss, agent.learn_times)
-            # writer.add_scalar("Loss/value loss", value_loss, agent.learn_times)
-            # writer.add_scalar("Loss/entropy loss", entropy_loss, agent.learn_times)
+            writer.add_scalar("Loss/policy loss", policy_loss, agent.learn_times)
+            writer.add_scalar("Loss/value loss", value_loss, agent.learn_times)
+            writer.add_scalar("Loss/entropy loss", entropy_loss, agent.learn_times)
         ###############################################################################################################
         # empty trajectory
         agent.reset_traj()
@@ -83,7 +89,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Proximal Policy Optimization Implementation')
     parser.add_argument('--agent_name', type=str, default='PPO')
     parser.add_argument('--env', type=str, default='Pendulum-v1', help='gym environment name(continuous)')
-    parser.add_argument('--seed', type=int, default=10)
+    parser.add_argument('--seed', type=int, default=12)
     parser.add_argument('--gamma', type=float, default=0.95, help='discount factor')
     parser.add_argument('--lambd', type=float, default=1.0, help='exponential weight discount for gae')
     parser.add_argument('--a_lr', type=float, default=1e-3)
@@ -95,7 +101,7 @@ if __name__ == "__main__":
     parser.add_argument('--v_loss_coef', type=float, default=0.5, help='value loss coefficient')
     parser.add_argument('--e_loss_coef', type=float, default=0.001, help='entropy loss coefficient')
     parser.add_argument('--print_freq', type=int, default=5)
-    parser.add_argument('--save_freq', type=int, default=25)
+    parser.add_argument('--save_freq', type=int, default=100)
     args = parser.parse_args()
     train(args)
     

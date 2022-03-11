@@ -2,10 +2,6 @@ import gym
 import torch
 import time
 import argparse
-import numpy as np
-import matplotlib
-import matplotlib.pyplot as plt
-from torch.utils.tensorboard import SummaryWriter
 from ppo import PPO_agent
 
 

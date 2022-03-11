@@ -4,7 +4,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from pg_baseline import PG_B_agent
 
-env = gym.make('Pendulum-v1') # max_episode_steps=1000 Important!
+env = gym.make('Pendulum-v1') # set max_episode_steps=1000 Important!
 input_dim = env.observation_space.shape[0]
 output_dim = env.action_space.shape[0]
 

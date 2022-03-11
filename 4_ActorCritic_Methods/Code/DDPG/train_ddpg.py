@@ -9,7 +9,7 @@ from datetime import datetime
 TIMESTAMP = '{0:%Y-%m-%d_%H-%M-%S}'.format(datetime.now())
 
 def train(args):
-    env = gym.make(args.env)
+    env = gym.make(args.env) # set max_episode_steps=1000
     env.seed(args.seed)
     torch.manual_seed(args.seed)
     random.seed(args.seed)
@@ -36,13 +36,14 @@ def train(args):
     while True:
         action = agent.get_action(state, args.noise)
         state_, reward, is_terminal, _ = env.step(action)
+        reward = reward/10
         agent.store_memory(state, action, reward, state_, is_terminal)
         state = state_
 
         if len(agent.mem) > args.batch_size and total_step % args.learn_freq == 0:
             actor_loss, critic_loss = agent.learn(args.batch_size)
-        writer.add_scalar("Loss/actor loss", actor_loss, agent.learn_count)
-        writer.add_scalar("Loss/critic loss", critic_loss, agent.learn_count)
+            writer.add_scalar("Loss/actor loss", actor_loss, agent.learn_count)
+            writer.add_scalar("Loss/critic loss", critic_loss, agent.learn_count)
 
         step += 1
         total_step += 1
@@ -56,16 +57,17 @@ def train(args):
             writer.add_scalar("Performance/episode step", step, episode)
             writer.add_scalar("Performance/episode reward", reward_sum, episode)
             if episode % args.print_freq == 0 and episode >= 50:
-                print("====================================================")
+                print("======================================================================")
                 print("train model: " + agent.name)
                 print("train env: " + args.env)
                 print("episode: {}".format(episode))
                 print("episode step: {}".format(step))
+                print("episode noise: {}".format(args.noise))
                 print("episode reward: {}".format(reward_sum))
                 print("episode losses [actor, critic]: {}".format([actor_loss, critic_loss]))
-            if episode % args.save_freq == 0 and episode >= 500:
-                    model_filename = "4_ActorCritic_Methods/Model/"+agent.name+"_"+env.env.spec.id+"_episode_"+str(episode)
-                    agent.save(model_filename)
+            if episode % args.save_freq == 0 and episode >= 900:
+                model_filename = "4_ActorCritic_Methods/Model/"+agent.name+"_"+env.env.spec.id+"_episode_"+str(episode)+"_"
+                agent.save(model_filename)
             # ==========================================================================================
             state = env.reset()
             episode += 1
@@ -75,7 +77,7 @@ def train(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Deep Deterministic Policy Gradient')
-    parser.add_argument('--agent_name', type=str, default='PPO')
+    parser.add_argument('--agent_name', type=str, default='DDPG')
     parser.add_argument('--env', type=str, default='Pendulum-v1', help='gym environment name(continuous)')
     parser.add_argument('--seed', type=int, default=12)
     parser.add_argument('--gamma', type=float, default=0.95, help='discount factor')
@@ -84,11 +86,11 @@ if __name__ == "__main__":
     parser.add_argument('--tau', type=float, default=0.005, help='soft update parameter for target network')
     parser.add_argument('--sync_freq', type=int, default=1, help='update frequence for target network')
     parser.add_argument('--exp_replay_size', type=int, default=100000, help='experience replay buffer size')
-    parser.add_argument('--noise', type=float, default=0.2, help='noise parameter for choosing action(ensure exploration)')
+    parser.add_argument('--noise', type=float, default=0.1, help='noise parameter for choosing action(ensure exploration)')
     parser.add_argument('--learn_freq', type=int, default=32)
     parser.add_argument('--batch_size', type=int, default=32)
-    parser.add_argument('--max_steps', type=int, default=9999, help='max of steps for each episode')
-    parser.add_argument('--print_freq', type=int, default=5)
-    parser.add_argument('--save_freq', type=int, default=500)
+    parser.add_argument('--max_steps', type=int, default=999, help='max of steps for each episode')
+    parser.add_argument('--print_freq', type=int, default=50)
+    parser.add_argument('--save_freq', type=int, default=200)
     args = parser.parse_args()
     train(args)

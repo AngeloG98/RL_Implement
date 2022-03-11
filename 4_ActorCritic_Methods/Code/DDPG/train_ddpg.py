@@ -18,6 +18,7 @@ def train(args):
         state_dim=env.observation_space.shape[0],
         action_dim=env.action_space.shape[0],
         max_action=env.action_space.high,
+        min_action=env.action_space.low,
         gamma=args.gamma,
         a_lr=args.a_lr,
         c_lr=args.c_lr,
@@ -65,7 +66,7 @@ def train(args):
                 print("episode noise: {}".format(args.noise))
                 print("episode reward: {}".format(reward_sum))
                 print("episode losses [actor, critic]: {}".format([actor_loss, critic_loss]))
-            if episode % args.save_freq == 0 and episode >= 900:
+            if episode % args.save_freq == 0 and episode >= 6000:
                 model_filename = "4_ActorCritic_Methods/Model/"+agent.name+"_"+env.env.spec.id+"_episode_"+str(episode)+"_"
                 agent.save(model_filename)
             # ==========================================================================================
@@ -78,7 +79,7 @@ def train(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Deep Deterministic Policy Gradient')
     parser.add_argument('--agent_name', type=str, default='DDPG')
-    parser.add_argument('--env', type=str, default='Pendulum-v1', help='gym environment name(continuous)')
+    parser.add_argument('--env', type=str, default='LunarLanderContinuous-v2', help='gym environment name(continuous)') # Pendulum-v1, LunarLanderContinuous-v2
     parser.add_argument('--seed', type=int, default=12)
     parser.add_argument('--gamma', type=float, default=0.95, help='discount factor')
     parser.add_argument('--a_lr', type=float, default=1e-3)
@@ -91,6 +92,6 @@ if __name__ == "__main__":
     parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--max_steps', type=int, default=999, help='max of steps for each episode')
     parser.add_argument('--print_freq', type=int, default=50)
-    parser.add_argument('--save_freq', type=int, default=200)
+    parser.add_argument('--save_freq', type=int, default=2000)
     args = parser.parse_args()
     train(args)

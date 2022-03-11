@@ -7,11 +7,13 @@ from utils import ReplayMemory
 from network import ActorNet, CriticNet
 
 class DDPG_agent:
-    def __init__(self, state_dim, action_dim, max_action, gamma=0.99, a_lr=1e-3, c_lr=2e-3, tau=0.005, sync_freq=1, exp_replay_size=10000):
+    def __init__(self, state_dim, action_dim, max_action, min_action, gamma=0.99, a_lr=1e-3, c_lr=2e-3, tau=0.005, sync_freq=1, exp_replay_size=10000):
         self.mem = ReplayMemory(exp_replay_size)
         
-        self.actor = ActorNet(state_dim, action_dim, max_action[0]).cuda() # if max_aciton dim > 1 ?
-        self.actor_target = ActorNet(state_dim, action_dim, max_action[0]).cuda()
+        max_action_tensor = torch.tensor(max_action).float().cuda()
+        min_action_tensor = torch.tensor(min_action).float().cuda()
+        self.actor = ActorNet(state_dim, action_dim, max_action_tensor, min_action_tensor).cuda() # if max_aciton dim > 1 ?
+        self.actor_target = ActorNet(state_dim, action_dim, max_action_tensor, min_action_tensor).cuda()
         self.actor_target.load_state_dict(self.actor.state_dict())
         self.critic = CriticNet(state_dim, action_dim).cuda()
         self.critic_target = CriticNet(state_dim, action_dim).cuda()

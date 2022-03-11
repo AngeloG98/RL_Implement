@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class ActorNet(nn.Module):
-    def __init__(self, state_dim, action_dim, max_action) -> None:
+    def __init__(self, state_dim, action_dim, max_action, min_action) -> None:
         super(ActorNet, self).__init__()
 
         self.net = nn.Sequential(
@@ -13,11 +13,14 @@ class ActorNet(nn.Module):
             nn.Linear(64, action_dim),
             nn.Tanh()
         )
-        self.max_action = max_action
+        # projection
+        self.a = (max_action - min_action)/2
+        self.b = (max_action + min_action)/2
 
     def forward(self, x):
-        y = self.max_action * self.net(x)
-        return y
+        y = self.net(x)
+        out = self.a * y + self. b
+        return out
 
 class CriticNet(nn.Module):
     def __init__(self, state_dim, action_dim) -> None:
@@ -30,5 +33,5 @@ class CriticNet(nn.Module):
         )
 
     def forward(self, x, u):
-        y = self.net(torch.cat([x, u], 1))
-        return y
+        out = self.net(torch.cat([x, u], 1))
+        return out

@@ -15,6 +15,7 @@ def train(args):
         state_dim=env.observation_space.shape[0],
         action_dim=env.action_space.shape[0],
         max_action=env.action_space.high,
+        min_action=env.action_space.low,
         gamma=args.gamma,
         a_lr=args.a_lr,
         c_lr=args.c_lr,
@@ -22,7 +23,7 @@ def train(args):
         sync_freq=args.sync_freq,
         exp_replay_size=args.exp_replay_size
     )
-    model_filename = "4_ActorCritic_Methods/Model/"+agent.name+"_"+env.env.spec.id+"_episode_1600"+"_"
+    model_filename = "4_ActorCritic_Methods/Model/"+agent.name+"_"+env.env.spec.id+"_episode_6000"+"_"
     agent.load(model_filename)
 
     episode = 0
@@ -66,7 +67,7 @@ def train(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Deep Deterministic Policy Gradient')
     parser.add_argument('--agent_name', type=str, default='DDPG')
-    parser.add_argument('--env', type=str, default='Pendulum-v1', help='gym environment name(continuous)')
+    parser.add_argument('--env', type=str, default='LunarLanderContinuous-v2', help='gym environment name(continuous)') # Pendulum-v1, LunarLanderContinuous-v2
     parser.add_argument('--seed', type=int, default=21)
     parser.add_argument('--gamma', type=float, default=0.95, help='discount factor')
     parser.add_argument('--a_lr', type=float, default=1e-3)

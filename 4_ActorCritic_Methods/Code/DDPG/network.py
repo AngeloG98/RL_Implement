@@ -13,7 +13,6 @@ class ActorNet(nn.Module):
             nn.Linear(64, action_dim),
             nn.Tanh()
         )
-
         self.max_action = max_action
 
     def forward(self, x):
@@ -21,7 +20,7 @@ class ActorNet(nn.Module):
         return y
 
 class CriticNet(nn.Module):
-    def __init(self, state_dim, action_dim) -> None:
+    def __init__(self, state_dim, action_dim) -> None:
         super(CriticNet, self).__init__()
 
         self.net = nn.Sequential(

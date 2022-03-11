@@ -11,7 +11,7 @@ class ReplayMemory:
     def __len__(self):
         return len(self.memory)
 
-    def push_pop(self, *args):
+    def push_pop(self, args):
         self.memory.append(self.Transition(*args))
     
     def unzip(self, transitions):
